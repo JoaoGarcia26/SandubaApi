@@ -19,24 +19,24 @@ namespace SandubaApi.Controllers
         [HttpGet("produtos")]
         public ActionResult<IEnumerable<Categoria>> GetCategoriasIngredientes()
         {
-            return _context.Categorias.Include(s => s.Ingredientes).ToList();
+            return _context.Categorias.AsNoTracking().Include(s => s.Ingredientes).ToList();
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            var listaCategorias = _context.Categorias.ToList();
+            var listaCategorias = _context.Categorias.AsNoTracking().ToList();
             if (listaCategorias is null)
             {
                 return NotFound("Categorias não encontradas");
             }
-            return listaCategorias;
+            return Ok(listaCategorias);
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Categoria> GetPorId(int id)
         {
-            var categoria = _context.Categorias.FirstOrDefault(c => c.CategoriaId == id);
+            var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(c => c.CategoriaId == id);
             if (categoria is null)
             {
                 return NotFound("Categoria não encontrada");
@@ -59,7 +59,10 @@ namespace SandubaApi.Controllers
         [HttpPut("{id:int}")]
         public ActionResult<Categoria> Put(int id, Categoria categoria)
         {
-            if (id != categoria.CategoriaId)
+            if (categoria is null)
+            {
+                return NotFound("Categoria não pode ser nula");
+            } else if (id != categoria.CategoriaId)
             {
                 return BadRequest("Categoria não existe");
             }

@@ -19,22 +19,22 @@ namespace SandubaApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Sanduiche>> Get()
         {
-            var listaSanduiches = _context.Sanduiches.ToList();
+            var listaSanduiches = _context.Sanduiches.AsNoTracking().ToList();
             if (listaSanduiches is null)
             {
                 return NotFound("Sanduiches não encontrados");
             }
-            return listaSanduiches;
+            return Ok(listaSanduiches);
         }
         [HttpGet("{id:int}", Name="ObterSanduiche")]
         public ActionResult<Sanduiche> GetSanduichePorId(int id)
         {
-            var sanduiche = _context.Sanduiches.FirstOrDefault(s => s.SanduicheId == id);
+            var sanduiche = _context.Sanduiches.AsNoTracking().FirstOrDefault(s => s.SanduicheId == id);
             if (sanduiche is null)
             {
                 return NotFound("Sanduiche não encontrado");
             }
-            return sanduiche;
+            return Ok(sanduiche);
         }
         [HttpPost]
         public ActionResult Post([FromBody] Sanduiche sanduiche)

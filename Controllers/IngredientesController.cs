@@ -18,7 +18,7 @@ namespace SandubaApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Ingrediente>> Get()
         {
-            var lista = _context.Ingredientes.ToList();
+            var lista = _context.Ingredientes.AsNoTracking().ToList();
             if (lista is null)
             {
                 return NotFound("Nenhum ingrediente cadastrado");
@@ -29,7 +29,7 @@ namespace SandubaApi.Controllers
         [HttpGet("{id:int}", Name = "ObterIngrediente")]
         public ActionResult GetPorId(int id)
         {
-            var item = _context.Ingredientes.FirstOrDefault(i => i.IngredienteId == id);
+            var item = _context.Ingredientes.AsNoTracking().FirstOrDefault(i => i.IngredienteId == id);
             if (item is null)
             {
                 return NotFound("Ingrediente não encontrado");

@@ -62,3 +62,12 @@ obj/SandubaApi.csproj.EntityFrameworkCore.targets
 obj/SandubaApi.csproj.nuget.dgspec.json
 obj/SandubaApi.csproj.nuget.g.props
 obj/SandubaApi.csproj.nuget.g.targets
+.vs/SandubaApi/ColorByRegexConfig.txt
+.vs/SandubaApi/config/applicationhost.config
+.vs/SandubaApi/DesignTimeBuild/.dtbcache.v2
+.vs/SandubaApi/FileContentIndex/dd77123a-e8da-43cc-bd27-3facd16b7426.vsidx
+.vs/SandubaApi/FileContentIndex/ed03de22-6a98-4c4e-aaff-86d2e452331d.vsidx
+.vs/SandubaApi/FileContentIndex/read.lock
+.vs/SandubaApi/v17/.suo
+.vs/SandubaApi/FileContentIndex/db4611a3-e0bd-41b2-82dd-726676963e8a.vsidx
+*.vsidx
