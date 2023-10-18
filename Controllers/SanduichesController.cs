@@ -17,11 +17,11 @@ namespace SandubaApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Sanduiche>> Get()
+        public async Task<ActionResult<IEnumerable<Sanduiche>>> GetAsync()
         {
             try
             {
-                var listaSanduiches = _context.Sanduiches.AsNoTracking().ToList();
+                var listaSanduiches = await _context.Sanduiches.AsNoTracking().ToListAsync();
                 if (listaSanduiches is null)
                 {
                     return NotFound("Sanduiches não encontrados");
@@ -33,11 +33,11 @@ namespace SandubaApi.Controllers
             }
         }
         [HttpGet("{id:int:min(1)}", Name="ObterSanduiche")]
-        public ActionResult<Sanduiche> GetSanduichePorId(int id)
+        public async Task<ActionResult<Sanduiche>> GetSanduichePorIdAsync(int id)
         {
             try
             {
-                var sanduiche = _context.Sanduiches.AsNoTracking().FirstOrDefault(s => s.SanduicheId == id);
+                var sanduiche = await _context.Sanduiches.AsNoTracking().FirstOrDefaultAsync(s => s.SanduicheId == id);
                 if (sanduiche is null)
                 {
                     return NotFound("Sanduiche não encontrado");
@@ -49,30 +49,30 @@ namespace SandubaApi.Controllers
             }
         }
         [HttpPost]
-        public ActionResult Post([FromBody] Sanduiche sanduiche)
+        public async Task<ActionResult> PostAsync(Sanduiche sanduiche)
         {
             if (sanduiche is null)
             {
                 return BadRequest();
             }
-            _context.Sanduiches.Add(sanduiche);
-            _context.SaveChanges();
+            await _context.Sanduiches.AddAsync(sanduiche);
+            await _context.SaveChangesAsync();
             return new CreatedAtRouteResult("ObterSanduiche", new { id = sanduiche.SanduicheId }, sanduiche);
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult Put(int id, [FromBody] Sanduiche sanduiche)
+        public async Task<ActionResult> PutAsync(int id, Sanduiche sanduiche)
         {
             if (id != sanduiche.SanduicheId)
             {
                 return BadRequest("O Sanduiche não existe");
             }
             _context.Entry(sanduiche).State = EntityState.Modified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok();
         }
         [HttpDelete("{id:int:min(1)}")]
-        public ActionResult<Sanduiche> Delete(int id)
+        public async Task<ActionResult<Sanduiche>> DeleteAsync(int id)
         {
             var sanduiche = _context.Sanduiches.FirstOrDefault(s => s.SanduicheId == id);
             if (sanduiche is null)
@@ -80,7 +80,7 @@ namespace SandubaApi.Controllers
                 return NotFound("Sanduiche não encontrado");
             }
             _context.Sanduiches.Remove(sanduiche);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return sanduiche;
         }
     }

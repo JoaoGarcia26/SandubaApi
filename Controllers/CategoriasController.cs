@@ -17,11 +17,11 @@ namespace SandubaApi.Controllers
         }
 
         [HttpGet("produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasIngredientes()
+        public async Task<ActionResult<IEnumerable<Categoria>>> GetCategoriasIngredientesAsync()
         {
             try
             {
-                var categorias = _context.Categorias.AsNoTracking().Include(s => s.Ingredientes).ToList();
+                var categorias = await _context.Categorias.AsNoTracking().Include(s => s.Ingredientes).ToListAsync();
                 if (categorias is null)
                 {
                     return NotFound("Categorias não encontradas");
@@ -33,11 +33,11 @@ namespace SandubaApi.Controllers
             }
         }
         [HttpGet]
-        public ActionResult<IEnumerable<Categoria>> Get()
+        public async Task<ActionResult<IEnumerable<Categoria>>> GetAsync()
         {
             try
             {
-                var listaCategorias = _context.Categorias.AsNoTracking().ToList();
+                var listaCategorias = await _context.Categorias.AsNoTracking().ToListAsync();
                 if (listaCategorias is null)
                 {
                     return NotFound("Categorias não encontradas");
@@ -50,11 +50,11 @@ namespace SandubaApi.Controllers
             
         }
         [HttpGet("{id:int}", Name = "ObterCategoria")]
-        public ActionResult<Categoria> GetPorId(int id)
+        public async Task<ActionResult<Categoria>> GetPorIdAsync(int id)
         {
             try
             {
-                var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(c => c.CategoriaId == id);
+                var categoria = await _context.Categorias.AsNoTracking().FirstOrDefaultAsync(c => c.CategoriaId == id);
                 if (categoria is null)
                 {
                     return NotFound("Categoria não encontrada");
@@ -67,19 +67,19 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] Categoria categoria)
+        public async Task<ActionResult> PostAsync(Categoria categoria)
         {
-            if (categoria == null)
+            if (categoria is null)
             {
                 return BadRequest("Categoria não pode ser nula");
             }
-            _context.Categorias.Add(categoria);
-            _context.SaveChanges();
+            await _context.Categorias.AddAsync(categoria);
+            await _context.SaveChangesAsync();
             return new CreatedAtRouteResult("ObterCategoria", new { id =  categoria.CategoriaId }, categoria);
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, [FromBody] Categoria categoria)
+        public async Task<ActionResult> PutAsync(int id, Categoria categoria)
         {
             if (categoria is null)
             {
@@ -89,20 +89,20 @@ namespace SandubaApi.Controllers
                 return BadRequest("Categoria não existe");
             }
             _context.Categorias.Entry(categoria).State = EntityState.Modified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok();
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult<Categoria> Delete(int id)
+        public async Task<ActionResult<Categoria>> DeleteAsync(int id)
         {
-            var categoria = _context.Categorias.FirstOrDefault(c => c.CategoriaId == id);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
             if (categoria is null)
             {
                 return NotFound("Categoria não existe");
             }
             _context.Categorias.Remove(categoria);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return categoria;
         }
     }

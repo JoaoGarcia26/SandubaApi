@@ -16,11 +16,11 @@ namespace SandubaApi.Controllers
         }
             
         [HttpGet]
-        public ActionResult<IEnumerable<Ingrediente>> Get()
+        public async Task<ActionResult<IEnumerable<Ingrediente>>> GetAsync()
         {
             try
             {
-                var lista = _context.Ingredientes.AsNoTracking().ToList();
+                var lista = await _context.Ingredientes.AsNoTracking().ToListAsync();
                 if (lista is null)
                 {
                     return NotFound("Nenhum ingrediente cadastrado");
@@ -34,11 +34,11 @@ namespace SandubaApi.Controllers
         }
 
         [HttpGet("{id:int:min(1)}", Name = "ObterIngrediente")]
-        public ActionResult<Ingrediente> GetPorId(int id)
+        public async Task<ActionResult<Ingrediente>> GetPorIdAsync(int id)
         {
             try
             {
-                var item = _context.Ingredientes.AsNoTracking().FirstOrDefault(i => i.IngredienteId == id);
+                var item = await _context.Ingredientes.AsNoTracking().FirstOrDefaultAsync(i => i.IngredienteId == id);
                 if (item is null)
                 {
                     return NotFound("Ingrediente não encontrado");
@@ -52,7 +52,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] Ingrediente ingrediente)
+        public async Task<ActionResult> PostAsync(Ingrediente ingrediente)
         {
             try
             {
@@ -60,8 +60,8 @@ namespace SandubaApi.Controllers
                 {
                     return BadRequest("Ingrediente não pode conter valores nulos.");
                 }
-                _context.Ingredientes.Add(ingrediente);
-                _context.SaveChanges();
+                await _context.Ingredientes.AddAsync(ingrediente);
+                await _context.SaveChangesAsync();
                 return new CreatedAtRouteResult("ObterIngrediente", new { id = ingrediente.IngredienteId }, ingrediente);
             } catch
             {
@@ -70,7 +70,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult Put(int id, [FromBody] Ingrediente ingrediente)
+        public async Task<ActionResult> PutAsync(int id, Ingrediente ingrediente)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace SandubaApi.Controllers
                     return BadRequest("Ingrediente não encontrado");
                 }
                 _context.Ingredientes.Entry(ingrediente).State = EntityState.Modified;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return Ok();
             } catch
             {
@@ -88,7 +88,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpDelete("{id:int:min(1)}")]
-        public ActionResult<Ingrediente> Delete(int id) 
+        public async Task<ActionResult<Ingrediente>> DeleteAsync(int id) 
         {
             var item = _context.Ingredientes.FirstOrDefault(i => id == i.IngredienteId);
             if (item is null)
@@ -96,7 +96,7 @@ namespace SandubaApi.Controllers
                 return NotFound("Ingrediente não encontrado");
             }
             _context.Ingredientes.Remove(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return item;
         }
     }
