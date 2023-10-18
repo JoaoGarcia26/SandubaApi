@@ -19,22 +19,34 @@ namespace SandubaApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Sanduiche>> Get()
         {
-            var listaSanduiches = _context.Sanduiches.AsNoTracking().ToList();
-            if (listaSanduiches is null)
+            try
             {
-                return NotFound("Sanduiches não encontrados");
+                var listaSanduiches = _context.Sanduiches.AsNoTracking().ToList();
+                if (listaSanduiches is null)
+                {
+                    return NotFound("Sanduiches não encontrados");
+                }
+                return listaSanduiches;
+            } catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
             }
-            return Ok(listaSanduiches);
         }
-        [HttpGet("{id:int}", Name="ObterSanduiche")]
+        [HttpGet("{id:int:min(1)}", Name="ObterSanduiche")]
         public ActionResult<Sanduiche> GetSanduichePorId(int id)
         {
-            var sanduiche = _context.Sanduiches.AsNoTracking().FirstOrDefault(s => s.SanduicheId == id);
-            if (sanduiche is null)
+            try
             {
-                return NotFound("Sanduiche não encontrado");
+                var sanduiche = _context.Sanduiches.AsNoTracking().FirstOrDefault(s => s.SanduicheId == id);
+                if (sanduiche is null)
+                {
+                    return NotFound("Sanduiche não encontrado");
+                }
+                return sanduiche;
+            } catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
             }
-            return Ok(sanduiche);
         }
         [HttpPost]
         public ActionResult Post([FromBody] Sanduiche sanduiche)
@@ -48,8 +60,8 @@ namespace SandubaApi.Controllers
             return new CreatedAtRouteResult("ObterSanduiche", new { id = sanduiche.SanduicheId }, sanduiche);
         }
 
-        [HttpPut("{id:int}")]
-        public ActionResult Put(int id, Sanduiche sanduiche)
+        [HttpPut("{id:int:min(1)}")]
+        public ActionResult Put(int id, [FromBody] Sanduiche sanduiche)
         {
             if (id != sanduiche.SanduicheId)
             {
@@ -57,10 +69,10 @@ namespace SandubaApi.Controllers
             }
             _context.Entry(sanduiche).State = EntityState.Modified;
             _context.SaveChanges();
-            return Ok(sanduiche);
+            return Ok();
         }
-        [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        [HttpDelete("{id:int:min(1)}")]
+        public ActionResult<Sanduiche> Delete(int id)
         {
             var sanduiche = _context.Sanduiches.FirstOrDefault(s => s.SanduicheId == id);
             if (sanduiche is null)
@@ -69,7 +81,7 @@ namespace SandubaApi.Controllers
             }
             _context.Sanduiches.Remove(sanduiche);
             _context.SaveChanges();
-            return Ok(sanduiche);
+            return sanduiche;
         }
     }
 }

@@ -71,3 +71,6 @@ obj/SandubaApi.csproj.nuget.g.targets
 .vs/SandubaApi/v17/.suo
 .vs/SandubaApi/FileContentIndex/db4611a3-e0bd-41b2-82dd-726676963e8a.vsidx
 *.vsidx
+.vs/SandubaApi/v17/.futdcache.v2
+.vs/ProjectEvaluation/sandubaapi.projects.v7.bin
+.vs/ProjectEvaluation/sandubaapi.metadata.v7.bin

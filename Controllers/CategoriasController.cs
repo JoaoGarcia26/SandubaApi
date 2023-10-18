@@ -19,33 +19,55 @@ namespace SandubaApi.Controllers
         [HttpGet("produtos")]
         public ActionResult<IEnumerable<Categoria>> GetCategoriasIngredientes()
         {
-            return _context.Categorias.AsNoTracking().Include(s => s.Ingredientes).ToList();
+            try
+            {
+                var categorias = _context.Categorias.AsNoTracking().Include(s => s.Ingredientes).ToList();
+                if (categorias is null)
+                {
+                    return NotFound("Categorias não encontradas");
+                }
+                return categorias;
+            } catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+            }
         }
-
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> Get()
         {
-            var listaCategorias = _context.Categorias.AsNoTracking().ToList();
-            if (listaCategorias is null)
+            try
             {
-                return NotFound("Categorias não encontradas");
+                var listaCategorias = _context.Categorias.AsNoTracking().ToList();
+                if (listaCategorias is null)
+                {
+                    return NotFound("Categorias não encontradas");
+                }
+                return listaCategorias;
+            } catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
             }
-            return Ok(listaCategorias);
+            
         }
-
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Categoria> GetPorId(int id)
         {
-            var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(c => c.CategoriaId == id);
-            if (categoria is null)
+            try
             {
-                return NotFound("Categoria não encontrada");
+                var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(c => c.CategoriaId == id);
+                if (categoria is null)
+                {
+                    return NotFound("Categoria não encontrada");
+                }
+                return categoria;
+            } catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
             }
-            return Ok(categoria);
         }
 
         [HttpPost]
-        public ActionResult<Categoria> Post(Categoria categoria)
+        public ActionResult Post([FromBody] Categoria categoria)
         {
             if (categoria == null)
             {
@@ -57,7 +79,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult<Categoria> Put(int id, Categoria categoria)
+        public ActionResult Put(int id, [FromBody] Categoria categoria)
         {
             if (categoria is null)
             {
@@ -68,7 +90,7 @@ namespace SandubaApi.Controllers
             }
             _context.Categorias.Entry(categoria).State = EntityState.Modified;
             _context.SaveChanges();
-            return Ok(categoria);
+            return Ok();
         }
 
         [HttpDelete("{id:int}")]
@@ -81,7 +103,7 @@ namespace SandubaApi.Controllers
             }
             _context.Categorias.Remove(categoria);
             _context.SaveChanges();
-            return Ok(categoria);
+            return categoria;
         }
     }
 }

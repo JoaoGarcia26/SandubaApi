@@ -18,51 +18,77 @@ namespace SandubaApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Ingrediente>> Get()
         {
-            var lista = _context.Ingredientes.AsNoTracking().ToList();
-            if (lista is null)
+            try
             {
-                return NotFound("Nenhum ingrediente cadastrado");
+                var lista = _context.Ingredientes.AsNoTracking().ToList();
+                if (lista is null)
+                {
+                    return NotFound("Nenhum ingrediente cadastrado");
+                }
+                return lista;
             }
-            return Ok(lista);
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+            }
         }
 
-        [HttpGet("{id:int}", Name = "ObterIngrediente")]
-        public ActionResult GetPorId(int id)
+        [HttpGet("{id:int:min(1)}", Name = "ObterIngrediente")]
+        public ActionResult<Ingrediente> GetPorId(int id)
         {
-            var item = _context.Ingredientes.AsNoTracking().FirstOrDefault(i => i.IngredienteId == id);
-            if (item is null)
+            try
             {
-                return NotFound("Ingrediente não encontrado");
+                var item = _context.Ingredientes.AsNoTracking().FirstOrDefault(i => i.IngredienteId == id);
+                if (item is null)
+                {
+                    return NotFound("Ingrediente não encontrado");
+                }
+                return item;
             }
-            return Ok(item);
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+            }
         }
 
         [HttpPost]
-        public ActionResult Post(Ingrediente ingrediente)
+        public ActionResult Post([FromBody] Ingrediente ingrediente)
         {
-            if (ingrediente is null)
+            try
             {
-                return BadRequest("Ingrediente não pode conter valores nulos.");
+                if (ingrediente is null)
+                {
+                    return BadRequest("Ingrediente não pode conter valores nulos.");
+                }
+                _context.Ingredientes.Add(ingrediente);
+                _context.SaveChanges();
+                return new CreatedAtRouteResult("ObterIngrediente", new { id = ingrediente.IngredienteId }, ingrediente);
+            } catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
             }
-            _context.Ingredientes.Add(ingrediente);
-            _context.SaveChanges();
-            return new CreatedAtRouteResult("ObterIngrediente", new { id = ingrediente.IngredienteId }, ingrediente);
         }
 
-        [HttpPut("{id:int}")]
-        public ActionResult Put(int id, Ingrediente ingrediente)
+        [HttpPut("{id:int:min(1)}")]
+        public ActionResult Put(int id, [FromBody] Ingrediente ingrediente)
         {
-            if (id != ingrediente.IngredienteId)
+            try
             {
-                return BadRequest("Ingrediente não encontrado");
+                if (id != ingrediente.IngredienteId)
+                {
+                    return BadRequest("Ingrediente não encontrado");
+                }
+                _context.Ingredientes.Entry(ingrediente).State = EntityState.Modified;
+                _context.SaveChanges();
+                return Ok();
+            } catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
             }
-            _context.Ingredientes.Entry(ingrediente).State = EntityState.Modified;
-            _context.SaveChanges();
-            return Ok(ingrediente);
         }
 
-        [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id) 
+        [HttpDelete("{id:int:min(1)}")]
+        public ActionResult<Ingrediente> Delete(int id) 
         {
             var item = _context.Ingredientes.FirstOrDefault(i => id == i.IngredienteId);
             if (item is null)
@@ -71,7 +97,7 @@ namespace SandubaApi.Controllers
             }
             _context.Ingredientes.Remove(item);
             _context.SaveChanges();
-            return Ok(item);
+            return item;
         }
     }
 }
