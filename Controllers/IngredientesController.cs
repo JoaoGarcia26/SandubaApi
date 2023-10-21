@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SandubaApi.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class IngredientesController : ControllerBase
     {
@@ -29,7 +29,7 @@ namespace SandubaApi.Controllers
             }
             catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
 
@@ -47,7 +47,7 @@ namespace SandubaApi.Controllers
             }
             catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
 
@@ -65,7 +65,7 @@ namespace SandubaApi.Controllers
                 return new CreatedAtRouteResult("ObterIngrediente", new { id = ingrediente.IngredienteId }, ingrediente);
             } catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
 
@@ -83,21 +83,28 @@ namespace SandubaApi.Controllers
                 return Ok();
             } catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
 
         [HttpDelete("{id:int:min(1)}")]
         public async Task<ActionResult<Ingrediente>> DeleteAsync(int id) 
         {
-            var item = _context.Ingredientes.FirstOrDefault(i => id == i.IngredienteId);
-            if (item is null)
+            try
             {
-                return NotFound("Ingrediente não encontrado");
+                var item = _context.Ingredientes.FirstOrDefault(i => id == i.IngredienteId);
+                if (item is null)
+                {
+                    return NotFound("Ingrediente não encontrado");
+                }
+                _context.Ingredientes.Remove(item);
+                await _context.SaveChangesAsync();
+                return item;
             }
-            _context.Ingredientes.Remove(item);
-            await _context.SaveChangesAsync();
-            return item;
+            catch
+            {
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SandubaApi.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CategoriasController : ControllerBase
     {
@@ -29,7 +29,7 @@ namespace SandubaApi.Controllers
                 return categorias;
             } catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
         [HttpGet]
@@ -45,7 +45,7 @@ namespace SandubaApi.Controllers
                 return listaCategorias;
             } catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
             
         }
@@ -62,48 +62,70 @@ namespace SandubaApi.Controllers
                 return categoria;
             } catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
 
         [HttpPost]
         public async Task<ActionResult> PostAsync(Categoria categoria)
         {
-            if (categoria is null)
+            try
             {
-                return BadRequest("Categoria não pode ser nula");
+                if (categoria is null)
+                {
+                    return BadRequest("Categoria não pode ser nula");
+                }
+                await _context.Categorias.AddAsync(categoria);
+                await _context.SaveChangesAsync();
+                return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
             }
-            await _context.Categorias.AddAsync(categoria);
-            await _context.SaveChangesAsync();
-            return new CreatedAtRouteResult("ObterCategoria", new { id =  categoria.CategoriaId }, categoria);
+            catch
+            {
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
+            }
         }
 
         [HttpPut("{id:int}")]
         public async Task<ActionResult> PutAsync(int id, Categoria categoria)
         {
-            if (categoria is null)
+            try
             {
-                return NotFound("Categoria não pode ser nula");
-            } else if (id != categoria.CategoriaId)
-            {
-                return BadRequest("Categoria não existe");
+                if (categoria is null)
+                {
+                    return NotFound("Categoria não pode ser nula");
+                }
+                else if (id != categoria.CategoriaId)
+                {
+                    return BadRequest("Categoria não existe");
+                }
+                _context.Categorias.Entry(categoria).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return Ok();
             }
-            _context.Categorias.Entry(categoria).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch
+            {
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
+            }  
         }
 
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<Categoria>> DeleteAsync(int id)
         {
-            var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
-            if (categoria is null)
+            try
             {
-                return NotFound("Categoria não existe");
+                var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
+                if (categoria is null)
+                {
+                    return NotFound("Categoria não existe");
+                }
+                _context.Categorias.Remove(categoria);
+                await _context.SaveChangesAsync();
+                return categoria;
             }
-            _context.Categorias.Remove(categoria);
-            await _context.SaveChangesAsync();
-            return categoria;
+            catch
+            {
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SandubaApi.Context;
-using System.Security.Cryptography.Xml;
+using SandubaApi.Extensions;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +13,7 @@ builder.Services.AddControllers()
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 //Captura a ConnectionString dentro do arquivo appsettings.json
 string mysqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -29,6 +30,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.ConfigureExceptionHandler();
 
 app.UseHttpsRedirection();
 

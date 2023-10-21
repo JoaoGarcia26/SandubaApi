@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SandubaApi.Context;
 using SandubaApi.Models;
 using Microsoft.EntityFrameworkCore;
+using SandubaApi.Context;
 
 namespace SandubaApi.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class SanduichesController : ControllerBase
     {
@@ -27,12 +27,13 @@ namespace SandubaApi.Controllers
                     return NotFound("Sanduiches não encontrados");
                 }
                 return listaSanduiches;
-            } catch
+            }
+            catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
-        [HttpGet("{id:int:min(1)}", Name="ObterSanduiche")]
+        [HttpGet("{id:int:min(1)}", Name = "ObterSanduiche")]
         public async Task<ActionResult<Sanduiche>> GetSanduichePorIdAsync(int id)
         {
             try
@@ -40,48 +41,70 @@ namespace SandubaApi.Controllers
                 var sanduiche = await _context.Sanduiches.AsNoTracking().FirstOrDefaultAsync(s => s.SanduicheId == id);
                 if (sanduiche is null)
                 {
-                    return NotFound("Sanduiche não encontrado");
+                    return NotFound("sanduiche não encontrado");
                 }
                 return sanduiche;
-            } catch
+            }
+            catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno em nosso sistema.");
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
+
         [HttpPost]
         public async Task<ActionResult> PostAsync(Sanduiche sanduiche)
         {
-            if (sanduiche is null)
+            try
             {
-                return BadRequest();
+                if (sanduiche is null)
+                {
+                    return BadRequest();
+                }
+                await _context.Sanduiches.AddAsync(sanduiche);
+                await _context.SaveChangesAsync();
+                return new CreatedAtRouteResult("ObterSanduiche", new { id = sanduiche.SanduicheId }, sanduiche);
+            } catch 
+            {
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
-            await _context.Sanduiches.AddAsync(sanduiche);
-            await _context.SaveChangesAsync();
-            return new CreatedAtRouteResult("ObterSanduiche", new { id = sanduiche.SanduicheId }, sanduiche);
         }
 
         [HttpPut("{id:int:min(1)}")]
         public async Task<ActionResult> PutAsync(int id, Sanduiche sanduiche)
         {
-            if (id != sanduiche.SanduicheId)
+            try
             {
-                return BadRequest("O Sanduiche não existe");
+                if (id != sanduiche.SanduicheId)
+                {
+                    return BadRequest("O Sanduiche não existe");
+                }
+                _context.Entry(sanduiche).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return Ok();
+            } catch 
+            {
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
-            _context.Entry(sanduiche).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return Ok();
         }
+
         [HttpDelete("{id:int:min(1)}")]
         public async Task<ActionResult<Sanduiche>> DeleteAsync(int id)
         {
-            var sanduiche = _context.Sanduiches.FirstOrDefault(s => s.SanduicheId == id);
-            if (sanduiche is null)
+            try
             {
-                return NotFound("Sanduiche não encontrado");
+                var sanduiche = _context.Sanduiches.FirstOrDefault(s => s.SanduicheId == id);
+                if (sanduiche is null)
+                {
+                    return NotFound("Sanduiche não encontrado");
+                }
+                _context.Sanduiches.Remove(sanduiche);
+                await _context.SaveChangesAsync();
+                return sanduiche;
             }
-            _context.Sanduiches.Remove(sanduiche);
-            await _context.SaveChangesAsync();
-            return sanduiche;
+            catch
+            {
+                throw new Exception("Ocorreu um erro interno em nosso sistema.");
+            }
         }
     }
 }
