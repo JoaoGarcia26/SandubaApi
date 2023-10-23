@@ -6,4 +6,9 @@ Information: 0 - Content root path: C:\Users\João Victor\Documents\GitHub\Sandu
 Information: 20101 - Executed DbCommand (53ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
 SELECT `s`.`SanduicheId`, `s`.`Descricao`, `s`.`Nome`, `s`.`SanduicheImg`
 FROM `Sanduiches` AS `s`
-Information: 0 - =+= Metodo GET Sanduiches executado com sucesso! =+=
+Information: 0 -  Metodo GET Sanduiches executado com sucesso! 
+Information: 14 - Now listening on: https://localhost:7115
+Information: 14 - Now listening on: http://localhost:5005
+Information: 0 - Application started. Press Ctrl+C to shut down.
+Information: 0 - Hosting environment: Development
+Information: 0 - Content root path: C:\Users\João Victor\Documents\GitHub\SandubaApi\

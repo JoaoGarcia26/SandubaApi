@@ -16,12 +16,15 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Sistema de logs customizados
-builder.Services.AddScoped<LogsFilter>();
-builder.Logging.AddProvider(new CustomLoggingProvider(new CustomLoggingProviderConfiguration
-{
-    LogLevel = LogLevel.Information
-}));
+////Sistema de logs customizados 
+///
+/// (Sistema legado, substituido pela biblioteca NLog)
+/// 
+//builder.Services.AddScoped<LogsFilter>();
+//builder.Logging.AddProvider(new CustomLoggingProvider(new CustomLoggingProviderConfiguration
+//{
+//    LogLevel = LogLevel.Information
+//}));
 
 //Captura a ConnectionString dentro do arquivo appsettings.json
 string mysqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");

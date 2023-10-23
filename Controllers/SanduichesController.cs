@@ -2,6 +2,7 @@
 using SandubaApi.Models;
 using Microsoft.EntityFrameworkCore;
 using SandubaApi.Context;
+using NLog;
 
 namespace SandubaApi.Controllers
 {
@@ -10,12 +11,11 @@ namespace SandubaApi.Controllers
     public class SanduichesController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly ILogger _logger;
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public SanduichesController(AppDbContext context, ILogger<SanduichesController> logger)
+        public SanduichesController(AppDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -24,7 +24,7 @@ namespace SandubaApi.Controllers
             try
             {
                 var listaSanduiches = await _context.Sanduiches.AsNoTracking().ToListAsync();
-                _logger.LogInformation("=+= Metodo GET Sanduiches executado com sucesso! =+=");
+                _logger.Info("Metodo GET Sanduiches executado com sucesso!");
                 if (listaSanduiches is null)
                 {
                     return NotFound("Sanduiches não encontrados");
@@ -34,7 +34,7 @@ namespace SandubaApi.Controllers
             }
             catch
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo GET Sanduiches. =-=");
+                _logger.Info("Erro ao executar o metodo GET Sanduiches.");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -44,7 +44,7 @@ namespace SandubaApi.Controllers
             try
             {
                 var sanduiche = await _context.Sanduiches.AsNoTracking().FirstOrDefaultAsync(s => s.SanduicheId == id);
-                _logger.LogInformation($"=+= Metodo GET por ID ({id}) Sanduiches executado com sucesso! =+=");
+                _logger.Info($" Metodo GET por ID ({id}) Sanduiches executado com sucesso! ");
                 if (sanduiche is null)
                 {
                     return NotFound("sanduiche não encontrado");
@@ -53,7 +53,7 @@ namespace SandubaApi.Controllers
             }
             catch
             {
-                _logger.LogInformation($"=-= Erro ao executar o metodo GET por ID ({id}) Sanduiches. =-=");
+                _logger.Info($" Erro ao executar o metodo GET por ID ({id}) Sanduiches. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -69,11 +69,11 @@ namespace SandubaApi.Controllers
                 }
                 await _context.Sanduiches.AddAsync(sanduiche);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("=+= Metodo POST Sanduiches executado com sucesso! =+=");
+                _logger.Info(" Metodo POST Sanduiches executado com sucesso! ");
                 return new CreatedAtRouteResult("ObterSanduiche", new { id = sanduiche.SanduicheId }, sanduiche);
             } catch 
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo POST Sanduiches. =-=");
+                _logger.Info(" Erro ao executar o metodo POST Sanduiches. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -89,11 +89,11 @@ namespace SandubaApi.Controllers
                 }
                 _context.Entry(sanduiche).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("=+= Metodo PUT Sanduiches executado com sucesso! =+=");
+                _logger.Info(" Metodo PUT Sanduiches executado com sucesso! ");
                 return Ok();
             } catch 
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo PUT Sanduiches. =-=");
+                _logger.Info(" Erro ao executar o metodo PUT Sanduiches. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -110,12 +110,12 @@ namespace SandubaApi.Controllers
                 }
                 _context.Sanduiches.Remove(sanduiche);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("=+= Metodo DELETE Sanduiches executado com sucesso! =+=");
+                _logger.Info(" Metodo DELETE Sanduiches executado com sucesso! ");
                 return sanduiche;
             }
             catch
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo DELETE Sanduiches. =-=");
+                _logger.Info(" Erro ao executar o metodo DELETE Sanduiches. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }

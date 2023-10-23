@@ -2,6 +2,7 @@
 using SandubaApi.Context;
 using SandubaApi.Models;
 using Microsoft.EntityFrameworkCore;
+using NLog;
 
 namespace SandubaApi.Controllers
 {
@@ -10,12 +11,11 @@ namespace SandubaApi.Controllers
     public class CategoriasController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly ILogger _logger;
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public CategoriasController(AppDbContext appDbContext, ILogger<CategoriasController> logger)
+        public CategoriasController(AppDbContext appDbContext)
         {
             _context = appDbContext;
-            _logger = logger;
         }
 
         [HttpGet("produtos")]
@@ -24,7 +24,7 @@ namespace SandubaApi.Controllers
             try
             {
                 var categorias = await _context.Categorias.AsNoTracking().Include(s => s.Ingredientes).ToListAsync();
-                _logger.LogInformation("=+= Metodo GET Categorias executado com sucesso! =+=");
+                _logger.Info(" Metodo GET Categorias executado com sucesso! ");
                 if (categorias is null)
                 {
                     return NotFound("Categorias não encontradas");
@@ -32,7 +32,7 @@ namespace SandubaApi.Controllers
                 return categorias;
             } catch
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo GET Categorias. =-=");
+                _logger.Info(" Erro ao executar o metodo GET Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -42,7 +42,7 @@ namespace SandubaApi.Controllers
             try
             {
                 var listaCategorias = await _context.Categorias.AsNoTracking().ToListAsync();
-                _logger.LogInformation("=+= Metodo GET Categorias executado com sucesso! =+=");
+                _logger.Info(" Metodo GET Categorias executado com sucesso! ");
                 if (listaCategorias is null)
                 {
                     return NotFound("Categorias não encontradas");
@@ -50,7 +50,7 @@ namespace SandubaApi.Controllers
                 return listaCategorias;
             } catch
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo GET Categorias. =-=");
+                _logger.Info(" Erro ao executar o metodo GET Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
             
@@ -61,7 +61,7 @@ namespace SandubaApi.Controllers
             try
             {
                 var categoria = await _context.Categorias.AsNoTracking().FirstOrDefaultAsync(c => c.CategoriaId == id);
-                _logger.LogInformation($"=+= Metodo GET por ID ({id}) Categorias executado com sucesso! =+=");
+                _logger.Info($" Metodo GET por ID ({id}) Categorias executado com sucesso! ");
                 if (categoria is null)
                 {
                     return NotFound("Categoria não encontrada");
@@ -69,7 +69,7 @@ namespace SandubaApi.Controllers
                 return categoria;
             } catch
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo GET Categorias. =-=");
+                _logger.Info(" Erro ao executar o metodo GET Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -85,12 +85,12 @@ namespace SandubaApi.Controllers
                 }
                 await _context.Categorias.AddAsync(categoria);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("=+= Metodo POST Categorias executado com sucesso! =+=");
+                _logger.Info(" Metodo POST Categorias executado com sucesso! ");
                 return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
             }
             catch
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo POST Categorias. =-=");
+                _logger.Info(" Erro ao executar o metodo POST Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -110,12 +110,12 @@ namespace SandubaApi.Controllers
                 }
                 _context.Categorias.Entry(categoria).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("=+= Metodo PUT Categorias executado com sucesso! =+=");
+                _logger.Info(" Metodo PUT Categorias executado com sucesso! ");
                 return Ok();
             }
             catch
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo PUT Categorias. =-=");
+                _logger.Info(" Erro ao executar o metodo PUT Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }  
         }
@@ -132,12 +132,12 @@ namespace SandubaApi.Controllers
                 }
                 _context.Categorias.Remove(categoria);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("=+= Metodo DELETE Categorias executado com sucesso! =+=");
+                _logger.Info(" Metodo DELETE Categorias executado com sucesso! ");
                 return categoria;
             }
             catch
             {
-                _logger.LogInformation("=-= Erro ao executar o metodo DELETE Categorias. =-=");
+                _logger.Info(" Erro ao executar o metodo DELETE Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
