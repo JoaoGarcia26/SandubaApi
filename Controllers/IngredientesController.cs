@@ -9,10 +9,12 @@ namespace SandubaApi.Controllers
     [ApiController]
     public class IngredientesController : ControllerBase
     {
-        private AppDbContext _context;
-        public IngredientesController(AppDbContext appDbContext) 
+        private readonly AppDbContext _context;
+        private readonly ILogger _logger;
+        public IngredientesController(AppDbContext appDbContext, ILogger<IngredientesController> logger) 
         {
             _context = appDbContext;
+            _logger = logger;
         }
             
         [HttpGet]
@@ -21,6 +23,7 @@ namespace SandubaApi.Controllers
             try
             {
                 var lista = await _context.Ingredientes.AsNoTracking().ToListAsync();
+                _logger.LogInformation("=+= Metodo GET Ingredientes executado com sucesso! =+=");
                 if (lista is null)
                 {
                     return NotFound("Nenhum ingrediente cadastrado");
@@ -29,6 +32,7 @@ namespace SandubaApi.Controllers
             }
             catch
             {
+                _logger.LogInformation("=-= Erro ao executar o metodo GET Ingredientes. =-=");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -39,6 +43,7 @@ namespace SandubaApi.Controllers
             try
             {
                 var item = await _context.Ingredientes.AsNoTracking().FirstOrDefaultAsync(i => i.IngredienteId == id);
+                _logger.LogInformation($"=+= Metodo GET por ID ({id}) Ingredientes executado com sucesso! =+=");
                 if (item is null)
                 {
                     return NotFound("Ingrediente não encontrado");
@@ -47,6 +52,7 @@ namespace SandubaApi.Controllers
             }
             catch
             {
+                _logger.LogInformation($"=-= Erro ao executar o metodo GET por ID ({id}) Ingredientes. =-=");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -62,9 +68,11 @@ namespace SandubaApi.Controllers
                 }
                 await _context.Ingredientes.AddAsync(ingrediente);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("=+= Metodo POST Ingredientes executado com sucesso! =+=");
                 return new CreatedAtRouteResult("ObterIngrediente", new { id = ingrediente.IngredienteId }, ingrediente);
             } catch
             {
+                _logger.LogInformation("=-= Erro ao executar o metodo POST Ingredientes. =-=");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -80,9 +88,11 @@ namespace SandubaApi.Controllers
                 }
                 _context.Ingredientes.Entry(ingrediente).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("=+= Metodo PUT Ingredientes executado com sucesso! =+=");
                 return Ok();
             } catch
             {
+                _logger.LogInformation("=-= Erro ao executar o metodo PUT Ingredientes. =-=");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
@@ -99,10 +109,12 @@ namespace SandubaApi.Controllers
                 }
                 _context.Ingredientes.Remove(item);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("=+= Metodo DELETE Ingredientes executado com sucesso! =+=");
                 return item;
             }
             catch
             {
+                _logger.LogInformation("=-= Erro ao executar o metodo DELETE Ingredientes. =-=");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
         }
