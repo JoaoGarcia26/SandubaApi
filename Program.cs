@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SandubaApi.Context;
 using SandubaApi.Extensions;
+using SandubaApi.Filters;
+using SandubaApi.Logging;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,12 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Sistema de logs customizados
+builder.Services.AddScoped<LogsFilter>();
+builder.Logging.AddProvider(new CustomLoggingProvider(new CustomLoggingProviderConfiguration
+{
+    LogLevel = LogLevel.Information
+}));
 
 //Captura a ConnectionString dentro do arquivo appsettings.json
 string mysqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
