@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SandubaApi.Context;
-using SandubaApi.Models;
 using Microsoft.EntityFrameworkCore;
 using NLog;
+using SandubaApi.Context;
+using SandubaApi.Models;
+using SandubaApi.Repository.Interfaces;
 
 namespace SandubaApi.Controllers
 {
@@ -10,19 +11,19 @@ namespace SandubaApi.Controllers
     [ApiController]
     public class IngredientesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _uow;
         private static Logger _logger = LogManager.GetCurrentClassLogger();
-        public IngredientesController(AppDbContext appDbContext) 
+        public IngredientesController(IUnitOfWork context) 
         {
-            _context = appDbContext;
+            _uow = context;
         }
-            
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ingrediente>>> GetAsync()
+        public ActionResult<IEnumerable<Ingrediente>> Get()
         {
             try
             {
-                var lista = await _context.Ingredientes.AsNoTracking().ToListAsync();
+                var lista = _uow.IngredienteRepository.Get().ToList();
                 _logger.Info(" Metodo GET Ingredientes executado com sucesso! ");
                 if (lista is null)
                 {
@@ -38,11 +39,11 @@ namespace SandubaApi.Controllers
         }
 
         [HttpGet("{id:int:min(1)}", Name = "ObterIngrediente")]
-        public async Task<ActionResult<Ingrediente>> GetPorIdAsync(int id)
+        public ActionResult<Ingrediente> GetPorId(int id)
         {
             try
             {
-                var item = await _context.Ingredientes.AsNoTracking().FirstOrDefaultAsync(i => i.IngredienteId == id);
+                var item = _uow.IngredienteRepository.GetById(i => i.IngredienteId == id);
                 _logger.Info($" Metodo GET por ID ({id}) Ingredientes executado com sucesso! ");
                 if (item is null)
                 {
@@ -58,7 +59,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> PostAsync(Ingrediente ingrediente)
+        public ActionResult Post(Ingrediente ingrediente)
         {
             try
             {
@@ -66,11 +67,12 @@ namespace SandubaApi.Controllers
                 {
                     return BadRequest("Ingrediente não pode conter valores nulos.");
                 }
-                await _context.Ingredientes.AddAsync(ingrediente);
-                await _context.SaveChangesAsync();
+                _uow.IngredienteRepository.Update(ingrediente);
+                _uow.Commit();
                 _logger.Info(" Metodo POST Ingredientes executado com sucesso! ");
                 return new CreatedAtRouteResult("ObterIngrediente", new { id = ingrediente.IngredienteId }, ingrediente);
-            } catch
+            }
+            catch
             {
                 _logger.Info(" Erro ao executar o metodo POST Ingredientes. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
@@ -78,7 +80,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public async Task<ActionResult> PutAsync(int id, Ingrediente ingrediente)
+        public ActionResult Put(int id, Ingrediente ingrediente)
         {
             try
             {
@@ -86,11 +88,12 @@ namespace SandubaApi.Controllers
                 {
                     return BadRequest("Ingrediente não encontrado");
                 }
-                _context.Ingredientes.Entry(ingrediente).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                _uow.IngredienteRepository.Update(ingrediente);
+                _uow.Commit();
                 _logger.Info(" Metodo PUT Ingredientes executado com sucesso! ");
                 return Ok();
-            } catch
+            }
+            catch
             {
                 _logger.Info(" Erro ao executar o metodo PUT Ingredientes. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
@@ -98,17 +101,17 @@ namespace SandubaApi.Controllers
         }
 
         [HttpDelete("{id:int:min(1)}")]
-        public async Task<ActionResult<Ingrediente>> DeleteAsync(int id) 
+        public ActionResult<Ingrediente> Delete(int id)
         {
             try
             {
-                var item = _context.Ingredientes.FirstOrDefault(i => id == i.IngredienteId);
+                var item = _uow.IngredienteRepository.GetById(i => id == i.IngredienteId);
                 if (item is null)
                 {
                     return NotFound("Ingrediente não encontrado");
                 }
-                _context.Ingredientes.Remove(item);
-                await _context.SaveChangesAsync();
+                _uow.IngredienteRepository.Delete(item);
+                _uow.Commit();
                 _logger.Info(" Metodo DELETE Ingredientes executado com sucesso! ");
                 return item;
             }

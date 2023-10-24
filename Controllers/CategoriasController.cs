@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SandubaApi.Context;
-using SandubaApi.Models;
-using Microsoft.EntityFrameworkCore;
 using NLog;
+using SandubaApi.Models;
+using SandubaApi.Repository.Interfaces;
 
 namespace SandubaApi.Controllers
 {
@@ -10,12 +9,12 @@ namespace SandubaApi.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _uow;
         private static Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public CategoriasController(AppDbContext appDbContext)
+        public CategoriasController(IUnitOfWork context)
         {
-            _context = appDbContext;
+            _uow = context;
         }
 
         [HttpGet("produtos")]
@@ -23,13 +22,13 @@ namespace SandubaApi.Controllers
         {
             try
             {
-                var categorias = await _context.Categorias.AsNoTracking().Include(s => s.Ingredientes).ToListAsync();
+                var categorias = await _uow.CategoriaRepository.GetCategoriasIngredientesAsync();
                 _logger.Info(" Metodo GET Categorias executado com sucesso! ");
                 if (categorias is null)
                 {
                     return NotFound("Categorias não encontradas");
                 }
-                return categorias;
+                return categorias.ToList();
             } catch
             {
                 _logger.Info(" Erro ao executar o metodo GET Categorias. ");
@@ -37,37 +36,39 @@ namespace SandubaApi.Controllers
             }
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Categoria>>> GetAsync()
+        public ActionResult<IEnumerable<Categoria>> Get()
         {
             try
             {
-                var listaCategorias = await _context.Categorias.AsNoTracking().ToListAsync();
+                var listaCategorias = _uow.CategoriaRepository.Get().ToList();
                 _logger.Info(" Metodo GET Categorias executado com sucesso! ");
                 if (listaCategorias is null)
                 {
                     return NotFound("Categorias não encontradas");
                 }
                 return listaCategorias;
-            } catch
+            }
+            catch
             {
                 _logger.Info(" Erro ao executar o metodo GET Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
             }
-            
+
         }
         [HttpGet("{id:int}", Name = "ObterCategoria")]
-        public async Task<ActionResult<Categoria>> GetPorIdAsync(int id)
+        public ActionResult<Categoria> GetPorId(int id)
         {
             try
             {
-                var categoria = await _context.Categorias.AsNoTracking().FirstOrDefaultAsync(c => c.CategoriaId == id);
+                var categoria = _uow.CategoriaRepository.GetById(c => c.CategoriaId == id);
                 _logger.Info($" Metodo GET por ID ({id}) Categorias executado com sucesso! ");
                 if (categoria is null)
                 {
                     return NotFound("Categoria não encontrada");
                 }
                 return categoria;
-            } catch
+            }
+            catch
             {
                 _logger.Info(" Erro ao executar o metodo GET Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
@@ -75,7 +76,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> PostAsync(Categoria categoria)
+        public ActionResult Post(Categoria categoria)
         {
             try
             {
@@ -83,8 +84,8 @@ namespace SandubaApi.Controllers
                 {
                     return BadRequest("Categoria não pode ser nula");
                 }
-                await _context.Categorias.AddAsync(categoria);
-                await _context.SaveChangesAsync();
+                _uow.CategoriaRepository.Add(categoria);
+                _uow.Commit();
                 _logger.Info(" Metodo POST Categorias executado com sucesso! ");
                 return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
             }
@@ -96,7 +97,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> PutAsync(int id, Categoria categoria)
+        public ActionResult Put(int id, Categoria categoria)
         {
             try
             {
@@ -108,8 +109,8 @@ namespace SandubaApi.Controllers
                 {
                     return BadRequest("Categoria não existe");
                 }
-                _context.Categorias.Entry(categoria).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                _uow.CategoriaRepository.Update(categoria);
+                _uow.Commit();
                 _logger.Info(" Metodo PUT Categorias executado com sucesso! ");
                 return Ok();
             }
@@ -117,21 +118,21 @@ namespace SandubaApi.Controllers
             {
                 _logger.Info(" Erro ao executar o metodo PUT Categorias. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
-            }  
+            }
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult<Categoria>> DeleteAsync(int id)
+        public ActionResult<Categoria> Delete(int id)
         {
             try
             {
-                var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
+                var categoria = _uow.CategoriaRepository.GetById(c => c.CategoriaId == id);
                 if (categoria is null)
                 {
                     return NotFound("Categoria não existe");
                 }
-                _context.Categorias.Remove(categoria);
-                await _context.SaveChangesAsync();
+                _uow.CategoriaRepository.Delete(categoria);
+                _uow.Commit();
                 _logger.Info(" Metodo DELETE Categorias executado com sucesso! ");
                 return categoria;
             }

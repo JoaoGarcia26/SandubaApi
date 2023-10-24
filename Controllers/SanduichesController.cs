@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SandubaApi.Models;
 using Microsoft.EntityFrameworkCore;
-using SandubaApi.Context;
 using NLog;
+using SandubaApi.Models;
+using SandubaApi.Repository.Interfaces;
 
 namespace SandubaApi.Controllers
 {
@@ -10,12 +10,12 @@ namespace SandubaApi.Controllers
     [ApiController]
     public class SanduichesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _uow;
         private static Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public SanduichesController(AppDbContext context)
+        public SanduichesController(IUnitOfWork context)
         {
-            _context = context;
+            _uow = context;
         }
 
         [HttpGet]
@@ -23,12 +23,15 @@ namespace SandubaApi.Controllers
         {
             try
             {
-                var listaSanduiches = await _context.Sanduiches.AsNoTracking().ToListAsync();
+                var listaSanduiches = await _uow.SanduicheRepository.Get().ToListAsync();
+                
                 _logger.Info("Metodo GET Sanduiches executado com sucesso!");
+
                 if (listaSanduiches is null)
                 {
                     return NotFound("Sanduiches não encontrados");
                 }
+
                 return listaSanduiches;
                 
             }
@@ -39,11 +42,11 @@ namespace SandubaApi.Controllers
             }
         }
         [HttpGet("{id:int:min(1)}", Name = "ObterSanduiche")]
-        public async Task<ActionResult<Sanduiche>> GetSanduichePorIdAsync(int id)
+        public ActionResult<Sanduiche> GetSanduichePorId(int id)
         {
             try
             {
-                var sanduiche = await _context.Sanduiches.AsNoTracking().FirstOrDefaultAsync(s => s.SanduicheId == id);
+                var sanduiche = _uow.SanduicheRepository.GetById(s => s.SanduicheId == id);
                 _logger.Info($" Metodo GET por ID ({id}) Sanduiches executado com sucesso! ");
                 if (sanduiche is null)
                 {
@@ -59,7 +62,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> PostAsync(Sanduiche sanduiche)
+        public ActionResult Post(Sanduiche sanduiche)
         {
             try
             {
@@ -67,11 +70,12 @@ namespace SandubaApi.Controllers
                 {
                     return BadRequest();
                 }
-                await _context.Sanduiches.AddAsync(sanduiche);
-                await _context.SaveChangesAsync();
+                _uow.SanduicheRepository.Add(sanduiche);
+                _uow.Commit();
                 _logger.Info(" Metodo POST Sanduiches executado com sucesso! ");
                 return new CreatedAtRouteResult("ObterSanduiche", new { id = sanduiche.SanduicheId }, sanduiche);
-            } catch 
+            }
+            catch
             {
                 _logger.Info(" Erro ao executar o metodo POST Sanduiches. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
@@ -79,7 +83,7 @@ namespace SandubaApi.Controllers
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public async Task<ActionResult> PutAsync(int id, Sanduiche sanduiche)
+        public ActionResult Put(int id, Sanduiche sanduiche)
         {
             try
             {
@@ -87,11 +91,12 @@ namespace SandubaApi.Controllers
                 {
                     return BadRequest("O Sanduiche não existe");
                 }
-                _context.Entry(sanduiche).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                _uow.SanduicheRepository.Update(sanduiche);
+                _uow.Commit();
                 _logger.Info(" Metodo PUT Sanduiches executado com sucesso! ");
                 return Ok();
-            } catch 
+            }
+            catch
             {
                 _logger.Info(" Erro ao executar o metodo PUT Sanduiches. ");
                 throw new Exception("Ocorreu um erro interno em nosso sistema.");
@@ -99,17 +104,17 @@ namespace SandubaApi.Controllers
         }
 
         [HttpDelete("{id:int:min(1)}")]
-        public async Task<ActionResult<Sanduiche>> DeleteAsync(int id)
+        public ActionResult<Sanduiche> Delete(int id)
         {
             try
             {
-                var sanduiche = _context.Sanduiches.FirstOrDefault(s => s.SanduicheId == id);
+                var sanduiche = _uow.SanduicheRepository.GetById(s => s.SanduicheId == id);
                 if (sanduiche is null)
                 {
                     return NotFound("Sanduiche não encontrado");
                 }
-                _context.Sanduiches.Remove(sanduiche);
-                await _context.SaveChangesAsync();
+                _uow.SanduicheRepository.Delete(sanduiche);
+                _uow.Commit();
                 _logger.Info(" Metodo DELETE Sanduiches executado com sucesso! ");
                 return sanduiche;
             }

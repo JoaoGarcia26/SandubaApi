@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SandubaApi.Context;
 using SandubaApi.Extensions;
-using SandubaApi.Filters;
-using SandubaApi.Logging;
+using SandubaApi.Repository.Implementations;
+using SandubaApi.Repository.Interfaces;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +15,9 @@ builder.Services.AddControllers()
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//Injeção de dependencia no padrão UnitOfWork
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 ////Sistema de logs customizados 
 ///
